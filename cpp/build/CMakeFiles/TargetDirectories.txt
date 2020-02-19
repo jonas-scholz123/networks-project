@@ -1,0 +1,7 @@
+/home/jonas/Documents/programming/networks-project/cpp/build/CMakeFiles/install/strip.dir
+/home/jonas/Documents/programming/networks-project/cpp/build/CMakeFiles/edit_cache.dir
+/home/jonas/Documents/programming/networks-project/cpp/build/CMakeFiles/cpp.dir
+/home/jonas/Documents/programming/networks-project/cpp/build/CMakeFiles/list_install_components.dir
+/home/jonas/Documents/programming/networks-project/cpp/build/CMakeFiles/install/local.dir
+/home/jonas/Documents/programming/networks-project/cpp/build/CMakeFiles/rebuild_cache.dir
+/home/jonas/Documents/programming/networks-project/cpp/build/CMakeFiles/install.dir
