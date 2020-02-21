@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <fstream>
 #include <vector>
+#include <array>
 //#include <set>
 
 using namespace std;
@@ -48,20 +49,25 @@ class simplegraph {
         void write(char *);
         void write(ostream &);
         void write(ostream &, bool);
+        void writeDistribution(char *outFile, vector<int> dd);
 
         int getNumberStubs();
         int getNumberEdges();
         int getNumberVertices();
         int getVertexDegree(int);
-        void getDegreeDistribution(vector<int> &);
+        vector<int> getDegreeDistribution();
 
         int addVertex();
+        
+        bool endwalk(float q);
         int getRandomVertexPref();
+        int getRandomVertexUniform();
 
         void addEdge(int , int);
         int addEdgeSlowly(int , int );
 
         int getNeighbour(int , int );
+        int getRandomNeighbour(int v0);
 
 	private:
 
