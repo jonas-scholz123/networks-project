@@ -12,7 +12,7 @@ for key in q_sorted_keys:
     N, m, q= key
     vertices, ks = dists[key]
     xs, ys = logbin(ks, scale = 1.2)
-    plt.loglog(xs, ys, "x", label = "m = " + str(m))
+    plt.loglog(xs, ys, "x", label = "q = " + str(q))
 plt.grid()
 plt.legend()
 plt.show()
