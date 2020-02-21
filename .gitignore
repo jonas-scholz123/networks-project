@@ -1,0 +1,4 @@
+data/
+cpp/build/
+cpp/.kdev4/
+python/analysis/__pycache__/
