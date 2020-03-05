@@ -1,5 +1,7 @@
 data/
-cpp/build/
+cpp/
+!cpp/main.cpp
+!cpp/simplegraph.h
 figures/
 cpp/.kdev4/
 python/analysis/__pycache__/
