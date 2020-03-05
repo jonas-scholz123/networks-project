@@ -6,6 +6,20 @@ import matplotlib.pyplot as plt
 import matplotlib.style
 import matplotlib as mpl
 
+
+def make_cdf(dist, normalise = True):
+    xs = np.array([0] + list(dist.keys())) + 1
+    ys = [0] #include 0th element to start cdf at 0
+    y = 0
+    for v in dist.keys():
+        y += dist[v]
+        ys.append(y)
+    ys = np.array(ys)
+    if normalise:
+        return xs, ys/max(ys)
+    else:
+        return xs, ys
+
 def set_plot_defaults():
     x_size = 10
 
@@ -58,6 +72,46 @@ def import_distributions(task = "task3"):
                 data = (vertices, ks)
                 distributions[key] = data
     return distributions
+
+def import_max_degrees(task = "task3"):
+    ''' Imports c++ data from txt for all max degree files
+        matching the given task
+
+        task = "task1", "task2" or "task3"
+
+        returns: dict[(N,m)] for tasks 1, 2
+                 dict[(N, m, q)] for task 3
+    '''
+    datapath = "../../data"
+
+    max_degrees = {}
+    for filename in os.listdir(datapath):
+        if filename.endswith(".txt") and "max_degree" in filename:
+            if filename.startswith(task):
+                dist_path = os.path.join(datapath, filename)
+                fname = dist_path.split("/")[-1][0:-4] #todo check
+                N = int(re.findall("N[0-9]+", fname)[0][1:])
+                m = int(re.findall("m[0-9]+", fname)[0][1:])
+
+                if task == "task3":
+                    q = float(re.findall(r"q[01]\.[0-9]+", fname)[0][1:])
+                    key = (N, m, q)
+                else:
+                    key = (N, m)
+
+                f = open(dist_path)
+
+                times = []
+                k_maxs       = []
+
+                for line in f:
+                    time, k_max = line.split(",")
+                    times.append(int(time))
+                    k_maxs.append(int(k_max))
+
+                data = (times, k_maxs)
+                max_degrees[key] = data
+    return max_degrees
 
 def logbin(data, scale = 1., zeros = False):
     """
