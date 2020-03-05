@@ -1,4 +1,5 @@
 data/
 cpp/build/
+figures/
 cpp/.kdev4/
 python/analysis/__pycache__/
