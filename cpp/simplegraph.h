@@ -26,6 +26,11 @@ class simplegraph {
 	  *  methods to access them.
 	  */
 	 public:
+         int m;
+         int nr_edges;
+         int nr_vertices;
+         int max_degree;
+         int max_degree_vertex;
 
 // Using a set makes sense to avoid multiple edges but it does not allow for random access
 //	/*
@@ -41,6 +46,7 @@ class simplegraph {
     
         vector<vector<int>> v2v;
         vector<int> attachments;
+        vector<tuple<int, int>> max_degrees;
 
         // constructor
         simplegraph();
@@ -50,6 +56,7 @@ class simplegraph {
         void write(ostream &);
         void write(ostream &, bool);
         void writeDistribution(char *outFile, vector<int> dd);
+        void writeMaxDegrees(char *outFile, vector<tuple<int, int>> maxDegrees);
 
         int getNumberStubs();
         int getNumberEdges();
@@ -68,6 +75,8 @@ class simplegraph {
 
         int getNeighbour(int , int );
         int getRandomNeighbour(int v0);
+        
+        void updateMaxDegrees(int, int);
 
 	private:
 

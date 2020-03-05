@@ -7,6 +7,7 @@
 
 #include "simplegraph.h"
 #include <random>
+#include <tuple>
 #include <vector>
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,9 +21,9 @@ using namespace std;
 
 int main()
 {
-    string method = "task3";
+    string method = "task1";
     //TODO: verify method is valid str
-    int nr_vertices = 5000;
+    int nr_vertices = 10000000;
     int max_m = 16;
     int m = 5;
     float q = 0.7;
@@ -31,22 +32,42 @@ int main()
     bool writeon = true;
     
     // For varying m:
-    //for(int m = 1; m <= max_m; m = m*2){
-        
+    for(int m = 1; m <= max_m; m = m*2){
+
+    cout << "m = " << m << endl;
     // For varying q:
-    
-    for (float q : qs){
+    //for (float q : qs){
+        
     //for (int k = 0; k<number_qs; k++){
+        
+        
         // set up initial graph
         simplegraph g;
-        g.addVertex();
-        g.addVertex();
-        g.addEdge(0, 1);
+        g = simplegraph(); //reset for future loops
+        g.m = m;
+        g.max_degree = 0;
+
+        for (int i = 0; i < m; i++){
+            // start with m vertices
+            g.addVertex();
+        }
+        
+        for (int i = 0; i < m; i++){
+            // interconnect them excluding self
+            for (int j = 0; j < m; j++){
+                g.addEdgeSlowly(i, j);
+            }
+        }
         
 
-        // add vertices and connect them according to the random preferential attachment algorithm
         
-        for (int i = 0; i < nr_vertices; i++) {
+
+        // add vertices and connect them according to the specified method
+        
+        // -m because of m starting vertices
+        for (int i = 0; i < nr_vertices - m; i++) {
+            
+        int new_vertex = g.addVertex();
 
         
         int random_vertex = 0;
@@ -80,14 +101,19 @@ int main()
                 else{
                     //cout<< "Please choose method =rng taski for i = 1,2,3" << endl;
                 }
-                int new_vertex = g.addVertex();
+              
                 g.addEdgeSlowly(new_vertex, random_vertex);
+                g.updateMaxDegrees(random_vertex, i);
                 //cout << "new vertex " <<new_vertex << " has " << g.v2v[new_vertex].size() << " neighbours" << endl;
             }
-        }
         
+        }
+
         
         vector<int> dd = g.getDegreeDistribution();
+        vector<tuple<int, int>> maxDegrees = g.max_degrees;
+        
+        cout << "nr_vertices = " << g.v2v.size()<< endl;
         
         
         if (writeon){
@@ -95,6 +121,7 @@ int main()
             string fPathData = "../../data/";
             string networkDataNameStr;
             string distributionNameStr;
+            string maxDegreesNameStr;
             //write network
             
             // define name of data file
@@ -105,15 +132,24 @@ int main()
             else{
                 networkDataNameStr = fPathData + method + "_network_N"+to_string(nr_vertices) + "_m" + to_string(m) + ".txt";
                 distributionNameStr = fPathData + method + "_distribution_N"+to_string(nr_vertices) + "_m" + to_string(m) + ".txt";
+                maxDegreesNameStr = fPathData + method + "_max_degree_N"+to_string(nr_vertices) + "_m" + to_string(m) + ".txt";
             }
             
+            //write network
             char *networkDataName = &networkDataNameStr[0];
             g.write(networkDataName);
             
             //write distribution
             char *distributionName = &distributionNameStr[0];
             g.writeDistribution(distributionName, dd);
+            
+            //write max degree over time
+            char *DegreesName = &maxDegreesNameStr[0];
+            g.writeMaxDegrees(DegreesName, maxDegrees);
+            
+            
         }
+       
     }
     
     return 0;
@@ -128,11 +164,15 @@ simplegraph::simplegraph(){
 	 * Vertices are given an index starting from 0
 	 * Returns the index of new vertex (= number of vertices -1)
 	 */
-	int
-	simplegraph::addVertex(){
+	int	simplegraph::addVertex(){
 	    //v2v.push_back(set<int>());
 		//vector<int> blankvector;
 		v2v.push_back(vector<int>() );
+        int new_vertex = v2v.size()-1;
+        // define a small vector containing m copies of the new vertex and add to attachments
+        vector<int> m_attachments(m, new_vertex);
+        attachments.insert(attachments.end(), m_attachments.begin(), m_attachments.end());
+        nr_vertices ++;
 		return v2v.size()-1;
 	}
 
@@ -180,13 +220,15 @@ simplegraph::simplegraph(){
 	 */
 	void
 	simplegraph::addEdge(int s, int t){
-		v2v[s].push_back(t);
+        // s = outgoing, t = incoming
+		//v2v[s].push_back(t); // is directed, so commented out
 		v2v[t].push_back(s);
 		// This version is for set based structure
 		//		v2v[s].insert(t);
 		//		v2v[t].insert(s);
-        attachments.push_back(s);
+        //attachments.push_back(s);
         attachments.push_back(t);
+        nr_edges ++;
 	}
 
 	
@@ -199,14 +241,32 @@ simplegraph::simplegraph(){
 	 */
 	int
 	simplegraph::addEdgeSlowly(int s, int t){
-		if (s==t) return -1;
+        // s = outgoing, t = incoming
+        
+		//if (s==t) return -1; TODO: see if this still works
 		int maxSize=max(s,t)+1;
 		if (v2v.size()<maxSize){
 			v2v.resize(maxSize);
 		}
 		addEdge(s,t);
+        
 		return 0;
 	}
+	
+	void simplegraph::updateMaxDegrees(int inVertex, int time){
+        // Keep track of max degree
+        if (getVertexDegree(inVertex) > max_degree){
+            max_degree = getVertexDegree(inVertex);
+            max_degree_vertex = inVertex;
+            tuple <int, int> datapoint;
+            datapoint = make_tuple(time, max_degree);
+            max_degrees.push_back(datapoint);
+            //cout << "max degree = " << max_degree << endl;
+        }
+        
+    }
+	
+	
 	/**
 	 * Fetches the n-th neighbour of vertes s
 	 * Input
@@ -285,13 +345,14 @@ simplegraph::simplegraph(){
 	vector<int>
 	simplegraph::getDegreeDistribution(){
 		vector<int> dd;
-		for (int v=0; v<getNumberVertices(); v++){	
-			int k= getVertexDegree(v);
+		for (int v = 0; v < getNumberVertices(); v++){	
+			int k = getVertexDegree(v);
 			if (dd.size()<=k){
 				dd.resize(k+1); // vector must have size equal to maximum degree stored +1 as starts from k=0
 			}
 			dd[k]++;
 		}
+		//cout << "sum of all k = " << accumulate(dd.begin(), dd.end(), 0) << endl;
 		return dd;
 	}
 
@@ -344,10 +405,29 @@ simplegraph::simplegraph(){
 	  }
 	  
 	  //
-	  
 	  for (int i = 0; i < dd.size(); i++){
           fout << i << "," << dd[i] << endl;
-        }int source,target=-1;
+        }
+      //int source,target=-1;
+	
+	  fout.close();
+	}
+
+	void
+	simplegraph::writeMaxDegrees(char *outFile, vector<tuple<int, int>> max_degrees) {
+	  ofstream fout(outFile);
+      
+      // Catch Exception
+	  if (!fout) {
+	      cerr << "Can't open output file " << outFile << endl;
+	      exit(1);
+	  }
+	  
+	  //
+	  for (int i = 0; i < max_degrees.size(); i++){
+          fout << get<0>(max_degrees[i]) << "," << get<1>(max_degrees[i]) << endl;
+        }
+      //int source,target=-1;
 	
 	  fout.close();
 	}
